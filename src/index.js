@@ -39,6 +39,8 @@ supabase
 
 console.log('[worker] Ready.')
 
+setInterval(() => {}, 60 * 1000)
+
 process.on('SIGTERM', () => {
   server.close()
   process.exit(0)
