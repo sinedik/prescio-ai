@@ -1,0 +1,19 @@
+{
+  "name": "prescio-ai",
+  "version": "1.0.0",
+  "description": "Prescio AI microservice — prediction market intelligence",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "@supabase/supabase-js": "^2.100.1",
+    "dotenv": "^17.3.1"
+  }
+}
