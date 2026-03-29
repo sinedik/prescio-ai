@@ -44,22 +44,3 @@ export async function processJob(job) {
   }
 }
 
-export async function processPendingJobs(limit = 3) {
-  const { data: jobs } = await supabase
-    .from('analysis_queue')
-    .select('*')
-    .eq('status', 'pending')
-    .order('priority', { ascending: true })
-    .order('created_at', { ascending: true })
-    .limit(limit)
-
-  if (!jobs?.length) return
-
-  console.log(`[worker] ${jobs.length} pending jobs`)
-
-  for (const job of jobs) {
-    const result = await processJob(job)
-    if (result === 'limit_reached') break
-    await new Promise(r => setTimeout(r, 2000))
-  }
-}

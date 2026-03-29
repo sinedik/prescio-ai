@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { supabase } from './lib/supabase.js'
-import { processJob, processPendingJobs } from './worker.js'
+import { processJob } from './worker.js'
 
 console.log('╔══════════════════════════╗')
 console.log('║  Prescio AI Worker v1.0  ║')
@@ -19,10 +19,6 @@ supabase
     }
   })
   .subscribe(status => console.log('[realtime]', status))
-
-setInterval(() => processPendingJobs(3), 30 * 1000)
-
-processPendingJobs(5)
 
 process.on('SIGTERM', () => {
   console.log('[worker] Shutting down')
