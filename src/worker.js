@@ -29,6 +29,14 @@ export async function processJob(job) {
     console.log(`[worker] Job ${job.id} done`)
 
   } catch (err) {
+    if (err.message?.includes('usage limits')) {
+      console.log('[worker] Anthropic limit reached, stopping queue')
+      await supabase.from('analysis_queue')
+        .update({ status: 'pending' })
+        .eq('id', job.id)
+      return 'limit_reached'
+    }
+
     console.error(`[worker] Job ${job.id} failed:`, err.message)
     await supabase.from('analysis_queue')
       .update({ status: 'error', error: err.message })
@@ -50,7 +58,8 @@ export async function processPendingJobs(limit = 3) {
   console.log(`[worker] ${jobs.length} pending jobs`)
 
   for (const job of jobs) {
-    await processJob(job)
+    const result = await processJob(job)
+    if (result === 'limit_reached') break
     await new Promise(r => setTimeout(r, 2000))
   }
 }
