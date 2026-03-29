@@ -1,6 +1,14 @@
 import 'dotenv/config'
+import http from 'http'
 import { createClient } from '@supabase/supabase-js'
 import { processJob } from './worker.js'
+
+http.createServer((req, res) => {
+  res.writeHead(200)
+  res.end('ok')
+}).listen(process.env.PORT || 3000)
+
+console.log('[worker] Healthcheck on', process.env.PORT || 3000)
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
