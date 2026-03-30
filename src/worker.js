@@ -39,7 +39,7 @@ export async function processJob(job) {
 
     console.error(`[worker] Job ${job.id} failed:`, err.message)
     await supabase.from('analysis_queue')
-      .update({ status: 'error', error: err.message })
+      .update({ status: 'failed', error: err.message })
       .eq('id', job.id)
   }
 }

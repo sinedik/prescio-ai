@@ -2,7 +2,10 @@ import { supabase } from '../lib/supabase.js'
 import { callSonnet, parseJSON } from '../lib/claude.js'
 import { ANALYZE_MARKET_SYSTEM, buildAnalyzeMarketPrompt } from '../prompts/analyzeMarket.js'
 
+const VALID_TRIGGERED_BY = new Set(['user_request', 'scheduled', 'news_detected'])
+
 export async function analyzeMarket(marketId, eventId, triggeredBy = 'user_request') {
+  const normalizedTrigger = VALID_TRIGGERED_BY.has(triggeredBy) ? triggeredBy : 'scheduled'
   console.log(`[analyzeMarket] Starting: ${marketId}`)
 
   const { data: market } = await supabase
@@ -52,7 +55,7 @@ export async function analyzeMarket(marketId, eventId, triggeredBy = 'user_reque
       resolution_note: analysis.resolution_note,
       risk_factors: analysis.risk_factors,
       relevant_news: [],
-      triggered_by: triggeredBy,
+      triggered_by: normalizedTrigger,
       model: 'claude-sonnet-4-6',
       analyzed_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
