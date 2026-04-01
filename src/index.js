@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import http from 'http'
-import { createClient } from '@supabase/supabase-js'
-import { processJob } from './worker.js'
+import { supabase } from './lib/supabase.js'
+import { processJob, startPolling } from './worker.js'
 
 const PORT = parseInt(process.env.PORT || '8080')
 
@@ -14,15 +14,9 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`[http] Port ${PORT} open`)
 })
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-)
+console.log('[prescio-ai] starting')
 
-console.log('╔══════════════════════════╗')
-console.log('║  Prescio AI Worker v1.0  ║')
-console.log('╚══════════════════════════╝')
-
+// Realtime subscription for instant response to new jobs
 supabase
   .channel('ai_queue')
   .on('postgres_changes', {
@@ -32,14 +26,15 @@ supabase
   }, async (payload) => {
     if (payload.new?.status === 'pending') {
       console.log('[realtime] New job:', payload.new.id)
-      await processJob(payload.new)
+      processJob(payload.new)
     }
   })
-  .subscribe(status => console.log('[realtime]', status))
+  .subscribe(status => console.log('[realtime] Realtime subscription status:', status))
 
-console.log('[worker] Ready.')
+// Polling fallback — catches missed events, processes backlog
+startPolling()
 
-setInterval(() => {}, 60 * 1000)
+console.log('[worker] Starting prescio-ai worker')
 
 process.on('SIGTERM', () => {
   server.close()

@@ -41,19 +41,17 @@ export async function analyzeEvent(eventId, triggeredBy = 'user_request') {
 
   console.log(`[analyzeEvent] Saved. Sentiment: ${analysis.overall_sentiment}`)
 
-  if (markets.length > 0) {
-    await supabase.from('analysis_queue').upsert(
-      markets.map(m => ({
-        market_id: m.id,
-        event_id: eventId,
-        triggered_by: 'after_event_analysis',
-        priority: 3,
-        status: 'pending'
-      })),
-      { onConflict: 'market_id', ignoreDuplicates: true }
-    )
-    console.log(`[analyzeEvent] Queued ${markets.length} markets`)
+  // Cascade markets with escalating priority so they don't all process at once
+  for (let i = 0; i < markets.length; i++) {
+    await supabase.from('analysis_queue').insert({
+      market_id:    markets[i].id,
+      event_id:     eventId,
+      triggered_by: 'analyze_market',
+      priority:     6 + Math.floor(i / 3),  // every 3 markets priority drops by 1
+      status:       'pending',
+    })
   }
+  if (markets.length > 0) console.log(`[analyzeEvent] Queued ${markets.length} markets (escalating priority)`)
 
   return analysis
 }
