@@ -6,6 +6,7 @@ import { withRetry } from './utils/retry.js'
 import { analyzeEvent } from './services/analyzeEvent.js'
 import { analyzeMarket } from './services/analyzeMarket.js'
 import { analyzeSportOdds } from './services/analyzeSportOdds.js'
+import { analyzeSportEvent } from './services/analyzeSportEvent.js'
 import { matchCrossSources } from './services/matchCrossSources.js'
 import { checkNews } from './services/checkNews.js'
 import { groupMarkets } from './services/groupMarkets.js'
@@ -17,6 +18,7 @@ const HANDLERS = {
   analyze_event:       analyzeEvent,
   analyze_market:      analyzeMarket,
   analyze_sport_odds:  analyzeSportOdds,
+  analyze_sport_event: analyzeSportEvent,
   match_cross_sources: matchCrossSources,
   check_news:          checkNews,
   group_markets:       groupMarkets,
